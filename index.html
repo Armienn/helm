@@ -4320,28 +4320,9 @@ function _Browser_load(url)
 		}
 	}));
 }
-var author$project$Main$init = 'Ja hej du';
-var author$project$Main$update = F2(
-	function (_n0, model) {
-		return model;
-	});
-var elm$core$Basics$identity = function (x) {
-	return x;
-};
-var elm$core$Basics$False = {$: 'False'};
-var elm$core$Basics$True = {$: 'True'};
-var elm$core$Result$isOk = function (result) {
-	if (result.$ === 'Ok') {
-		return true;
-	} else {
-		return false;
-	}
-};
-var elm$core$Array$branchFactor = 32;
-var elm$core$Array$Array_elm_builtin = F4(
-	function (a, b, c, d) {
-		return {$: 'Array_elm_builtin', a: a, b: b, c: c, d: d};
-	});
+var author$project$Beast$init = {health: 200, maxHealth: 200, name: 'Wyrm'};
+var author$project$Helming$init = {health: 40, maxHealth: 40, name: 'Aslak', xp: 50};
+var author$project$Battle$init = {beast: author$project$Beast$init, hero: author$project$Helming$init};
 var elm$core$Basics$EQ = {$: 'EQ'};
 var elm$core$Basics$GT = {$: 'GT'};
 var elm$core$Basics$LT = {$: 'LT'};
@@ -4422,6 +4403,45 @@ var elm$core$Array$foldr = F3(
 var elm$core$Array$toList = function (array) {
 	return A3(elm$core$Array$foldr, elm$core$List$cons, _List_Nil, array);
 };
+var elm$core$Basics$add = _Basics_add;
+var author$project$Helming$update = F2(
+	function (action, model) {
+		if (action.$ === 'DoThing') {
+			return _Utils_update(
+				model,
+				{xp: model.xp + 3});
+		} else {
+			var sadf = action;
+			return model;
+		}
+	});
+var author$project$Battle$update = F2(
+	function (action, model) {
+		return _Utils_update(
+			model,
+			{
+				hero: A2(author$project$Helming$update, action, model.hero)
+			});
+	});
+var author$project$Helming$DoThing = {$: 'DoThing'};
+var author$project$Helming$DontDoThing = {$: 'DontDoThing'};
+var elm$core$Basics$identity = function (x) {
+	return x;
+};
+var elm$core$Basics$False = {$: 'False'};
+var elm$core$Basics$True = {$: 'True'};
+var elm$core$Result$isOk = function (result) {
+	if (result.$ === 'Ok') {
+		return true;
+	} else {
+		return false;
+	}
+};
+var elm$core$Array$branchFactor = 32;
+var elm$core$Array$Array_elm_builtin = F4(
+	function (a, b, c, d) {
+		return {$: 'Array_elm_builtin', a: a, b: b, c: c, d: d};
+	});
 var elm$core$Basics$ceiling = _Basics_ceiling;
 var elm$core$Basics$fdiv = _Basics_fdiv;
 var elm$core$Basics$logBase = F2(
@@ -4509,7 +4529,6 @@ var elm$core$Array$treeFromBuilder = F2(
 			}
 		}
 	});
-var elm$core$Basics$add = _Basics_add;
 var elm$core$Basics$apL = F2(
 	function (f, x) {
 		return f(x);
@@ -4818,16 +4837,111 @@ var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 			return 3;
 	}
 };
-var elm$html$Html$div = _VirtualDom_node('div');
+var elm$html$Html$span = _VirtualDom_node('span');
 var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var elm$html$Html$text = elm$virtual_dom$VirtualDom$text;
-var author$project$Main$view = function (model) {
+var author$project$Helming$View$separator = A2(
+	elm$html$Html$span,
+	_List_Nil,
+	_List_fromArray(
+		[
+			elm$html$Html$text(' - ')
+		]));
+var author$project$Helming$View$viewHealth = function (helming) {
+	return A2(
+		elm$html$Html$span,
+		_List_Nil,
+		_List_fromArray(
+			[
+				elm$html$Html$text(
+				'Health: ' + (elm$core$String$fromInt(helming.health) + (' / ' + elm$core$String$fromInt(helming.maxHealth))))
+			]));
+};
+var author$project$Helming$View$viewName = function (name) {
+	return A2(
+		elm$html$Html$span,
+		_List_Nil,
+		_List_fromArray(
+			[
+				elm$html$Html$text('Helming: ' + name)
+			]));
+};
+var author$project$Helming$View$viewXp = function (xp) {
+	return A2(
+		elm$html$Html$span,
+		_List_Nil,
+		_List_fromArray(
+			[
+				elm$html$Html$text(
+				'XP: ' + elm$core$String$fromInt(xp))
+			]));
+};
+var elm$html$Html$div = _VirtualDom_node('div');
+var author$project$Helming$View$viewHelming = function (helming) {
 	return A2(
 		elm$html$Html$div,
 		_List_Nil,
 		_List_fromArray(
 			[
-				elm$html$Html$text(model)
+				author$project$Helming$View$viewName(helming.name),
+				author$project$Helming$View$separator,
+				author$project$Helming$View$viewHealth(helming),
+				author$project$Helming$View$separator,
+				author$project$Helming$View$viewXp(helming.xp)
+			]));
+};
+var elm$html$Html$button = _VirtualDom_node('button');
+var elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 'Normal', a: a};
+};
+var elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var elm$html$Html$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			elm$virtual_dom$VirtualDom$on,
+			event,
+			elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var elm$html$Html$Events$onClick = function (msg) {
+	return A2(
+		elm$html$Html$Events$on,
+		'click',
+		elm$json$Json$Decode$succeed(msg));
+};
+var author$project$Battle$view = function (battle) {
+	return A2(
+		elm$html$Html$div,
+		_List_Nil,
+		_List_fromArray(
+			[
+				author$project$Helming$View$viewHelming(battle.hero),
+				A2(
+				elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						elm$html$Html$text('asfd')
+					])),
+				A2(
+				elm$html$Html$button,
+				_List_fromArray(
+					[
+						elm$html$Html$Events$onClick(author$project$Helming$DoThing)
+					]),
+				_List_fromArray(
+					[
+						elm$html$Html$text('do thing')
+					])),
+				A2(
+				elm$html$Html$button,
+				_List_fromArray(
+					[
+						elm$html$Html$Events$onClick(author$project$Helming$DontDoThing)
+					]),
+				_List_fromArray(
+					[
+						elm$html$Html$text('dont do thing')
+					]))
 			]));
 };
 var elm$core$Platform$Cmd$batch = _Platform_batch;
@@ -5148,7 +5262,7 @@ var elm$browser$Browser$sandbox = function (impl) {
 		});
 };
 var author$project$Main$main = elm$browser$Browser$sandbox(
-	{init: author$project$Main$init, update: author$project$Main$update, view: author$project$Main$view});
+	{init: author$project$Battle$init, update: author$project$Battle$update, view: author$project$Battle$view});
 _Platform_export({'Main':{'init':author$project$Main$main(
 	elm$json$Json$Decode$succeed(_Utils_Tuple0))(0)}});}(this));
 
