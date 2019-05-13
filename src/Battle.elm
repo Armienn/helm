@@ -2,7 +2,6 @@ module Battle exposing (..)
 
 import Beast exposing (..)
 import Helming exposing (..)
-import Helming.View exposing (..)
 import Html exposing (..)
 import Html.Events exposing (onClick)
 

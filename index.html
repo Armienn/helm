@@ -4840,14 +4840,14 @@ var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 var elm$html$Html$span = _VirtualDom_node('span');
 var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var elm$html$Html$text = elm$virtual_dom$VirtualDom$text;
-var author$project$Helming$View$separator = A2(
+var author$project$Helming$separator = A2(
 	elm$html$Html$span,
 	_List_Nil,
 	_List_fromArray(
 		[
 			elm$html$Html$text(' - ')
 		]));
-var author$project$Helming$View$viewHealth = function (helming) {
+var author$project$Helming$viewHealth = function (helming) {
 	return A2(
 		elm$html$Html$span,
 		_List_Nil,
@@ -4857,7 +4857,7 @@ var author$project$Helming$View$viewHealth = function (helming) {
 				'Health: ' + (elm$core$String$fromInt(helming.health) + (' / ' + elm$core$String$fromInt(helming.maxHealth))))
 			]));
 };
-var author$project$Helming$View$viewName = function (name) {
+var author$project$Helming$viewName = function (name) {
 	return A2(
 		elm$html$Html$span,
 		_List_Nil,
@@ -4866,7 +4866,7 @@ var author$project$Helming$View$viewName = function (name) {
 				elm$html$Html$text('Helming: ' + name)
 			]));
 };
-var author$project$Helming$View$viewXp = function (xp) {
+var author$project$Helming$viewXp = function (xp) {
 	return A2(
 		elm$html$Html$span,
 		_List_Nil,
@@ -4877,17 +4877,17 @@ var author$project$Helming$View$viewXp = function (xp) {
 			]));
 };
 var elm$html$Html$div = _VirtualDom_node('div');
-var author$project$Helming$View$viewHelming = function (helming) {
+var author$project$Helming$viewHelming = function (helming) {
 	return A2(
 		elm$html$Html$div,
 		_List_Nil,
 		_List_fromArray(
 			[
-				author$project$Helming$View$viewName(helming.name),
-				author$project$Helming$View$separator,
-				author$project$Helming$View$viewHealth(helming),
-				author$project$Helming$View$separator,
-				author$project$Helming$View$viewXp(helming.xp)
+				author$project$Helming$viewName(helming.name),
+				author$project$Helming$separator,
+				author$project$Helming$viewHealth(helming),
+				author$project$Helming$separator,
+				author$project$Helming$viewXp(helming.xp)
 			]));
 };
 var elm$html$Html$button = _VirtualDom_node('button');
@@ -4914,7 +4914,7 @@ var author$project$Battle$view = function (battle) {
 		_List_Nil,
 		_List_fromArray(
 			[
-				author$project$Helming$View$viewHelming(battle.hero),
+				author$project$Helming$viewHelming(battle.hero),
 				A2(
 				elm$html$Html$div,
 				_List_Nil,
