@@ -44,7 +44,7 @@ update action model =
 viewActions : Helming -> Html Msg
 viewActions model =
     div []
-        [ button [ onClick (GainXp 4) ] [ text "do thing" ]
+        [ button [ onClick (GainXp 5) ] [ text "do thing" ]
         , button [ onClick DontDoThing ] [ text "dont do thing" ]
         ]
 
