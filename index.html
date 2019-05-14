@@ -4406,10 +4406,11 @@ var elm$core$Array$toList = function (array) {
 var elm$core$Basics$add = _Basics_add;
 var author$project$Helming$update = F2(
 	function (action, model) {
-		if (action.$ === 'DoThing') {
+		if (action.$ === 'GainXp') {
+			var amount = action.a;
 			return _Utils_update(
 				model,
-				{xp: model.xp + 3});
+				{xp: model.xp + amount});
 		} else {
 			var sadf = action;
 			return model;
@@ -4423,8 +4424,10 @@ var author$project$Battle$update = F2(
 				hero: A2(author$project$Helming$update, action, model.hero)
 			});
 	});
-var author$project$Helming$DoThing = {$: 'DoThing'};
 var author$project$Helming$DontDoThing = {$: 'DontDoThing'};
+var author$project$Helming$GainXp = function (a) {
+	return {$: 'GainXp', a: a};
+};
 var elm$core$Basics$identity = function (x) {
 	return x;
 };
@@ -4837,9 +4840,57 @@ var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 			return 3;
 	}
 };
-var elm$html$Html$span = _VirtualDom_node('span');
+var elm$html$Html$button = _VirtualDom_node('button');
+var elm$html$Html$div = _VirtualDom_node('div');
 var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var elm$html$Html$text = elm$virtual_dom$VirtualDom$text;
+var elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 'Normal', a: a};
+};
+var elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var elm$html$Html$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			elm$virtual_dom$VirtualDom$on,
+			event,
+			elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var elm$html$Html$Events$onClick = function (msg) {
+	return A2(
+		elm$html$Html$Events$on,
+		'click',
+		elm$json$Json$Decode$succeed(msg));
+};
+var author$project$Helming$viewActions = function (model) {
+	return A2(
+		elm$html$Html$div,
+		_List_Nil,
+		_List_fromArray(
+			[
+				A2(
+				elm$html$Html$button,
+				_List_fromArray(
+					[
+						elm$html$Html$Events$onClick(
+						author$project$Helming$GainXp(4))
+					]),
+				_List_fromArray(
+					[
+						elm$html$Html$text('do thing')
+					])),
+				A2(
+				elm$html$Html$button,
+				_List_fromArray(
+					[
+						elm$html$Html$Events$onClick(author$project$Helming$DontDoThing)
+					]),
+				_List_fromArray(
+					[
+						elm$html$Html$text('dont do thing')
+					]))
+			]));
+};
+var elm$html$Html$span = _VirtualDom_node('span');
 var author$project$Helming$separator = A2(
 	elm$html$Html$span,
 	_List_Nil,
@@ -4876,7 +4927,6 @@ var author$project$Helming$viewXp = function (xp) {
 				'XP: ' + elm$core$String$fromInt(xp))
 			]));
 };
-var elm$html$Html$div = _VirtualDom_node('div');
 var author$project$Helming$viewHelming = function (helming) {
 	return A2(
 		elm$html$Html$div,
@@ -4889,24 +4939,6 @@ var author$project$Helming$viewHelming = function (helming) {
 				author$project$Helming$separator,
 				author$project$Helming$viewXp(helming.xp)
 			]));
-};
-var elm$html$Html$button = _VirtualDom_node('button');
-var elm$virtual_dom$VirtualDom$Normal = function (a) {
-	return {$: 'Normal', a: a};
-};
-var elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
-var elm$html$Html$Events$on = F2(
-	function (event, decoder) {
-		return A2(
-			elm$virtual_dom$VirtualDom$on,
-			event,
-			elm$virtual_dom$VirtualDom$Normal(decoder));
-	});
-var elm$html$Html$Events$onClick = function (msg) {
-	return A2(
-		elm$html$Html$Events$on,
-		'click',
-		elm$json$Json$Decode$succeed(msg));
 };
 var author$project$Battle$view = function (battle) {
 	return A2(
@@ -4922,26 +4954,7 @@ var author$project$Battle$view = function (battle) {
 					[
 						elm$html$Html$text('asfd')
 					])),
-				A2(
-				elm$html$Html$button,
-				_List_fromArray(
-					[
-						elm$html$Html$Events$onClick(author$project$Helming$DoThing)
-					]),
-				_List_fromArray(
-					[
-						elm$html$Html$text('do thing')
-					])),
-				A2(
-				elm$html$Html$button,
-				_List_fromArray(
-					[
-						elm$html$Html$Events$onClick(author$project$Helming$DontDoThing)
-					]),
-				_List_fromArray(
-					[
-						elm$html$Html$text('dont do thing')
-					]))
+				author$project$Helming$viewActions(battle.hero)
 			]));
 };
 var elm$core$Platform$Cmd$batch = _Platform_batch;
