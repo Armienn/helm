@@ -1,5 +1,7 @@
-module Beast exposing (Beast, init)
+module Beast exposing (Beast, init, viewBeast)
 
+import Html exposing (..)
+import CommonViews exposing (..)
 
 type alias Beast =
     { name : String
@@ -14,3 +16,12 @@ init =
     , maxHealth = 200
     , health = 200
     }
+
+viewBeast : Beast -> Html msg
+viewBeast beast =
+    div []
+        [ viewName "Beast" beast.name
+        , separator
+        , viewHealth beast
+        ]
+

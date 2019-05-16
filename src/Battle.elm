@@ -20,24 +20,37 @@ init =
 
 
 type Msg
-    = GotHelmingMsg Helming.Msg
-    | GotBeastMsg
+    = Attack Int
+    | Heal Int
 
 
 update : Msg -> Battle -> Battle
 update msg model =
     case msg of
-        GotHelmingMsg subMsg ->
-            { model | hero = Helming.update subMsg model.hero }
+        Heal amount ->
+            { model | hero = changeHealth model.hero amount }
 
-        GotBeastMsg ->
-            model
+        Attack amount ->
+            { model | beast = changeHealth model.beast -amount }
+
+
+
+-- VIEW
 
 
 view : Battle -> Html Msg
 view battle =
     div []
         [ viewHelming battle.hero
-        , div [] [ text "asfd" ]
-        , Html.map GotHelmingMsg (viewActions battle.hero)
+        , div [] [ text "vs" ]
+        , viewBeast battle.beast
+        , viewActions battle
+        ]
+
+
+viewActions : Battle -> Html Msg
+viewActions battle =
+    div []
+        [ button [ onClick (Attack 7) ] [ text "Attack" ]
+        , button [ onClick (Heal 5) ] [ text "Heal" ]
         ]
