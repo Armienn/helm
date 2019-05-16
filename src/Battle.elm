@@ -19,9 +19,19 @@ init =
     }
 
 
+type Msg
+    = GotHelmingMsg Helming.Msg
+    | GotBeastMsg
+
+
 update : Msg -> Battle -> Battle
-update action model =
-    { model | hero = Helming.update action model.hero }
+update msg model =
+    case msg of
+        GotHelmingMsg subMsg ->
+            { model | hero = Helming.update subMsg model.hero }
+
+        GotBeastMsg ->
+            model
 
 
 view : Battle -> Html Msg
@@ -29,5 +39,5 @@ view battle =
     div []
         [ viewHelming battle.hero
         , div [] [ text "asfd" ]
-        , viewActions battle.hero
+        , Html.map GotHelmingMsg (viewActions battle.hero)
         ]
