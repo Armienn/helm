@@ -1,4 +1,4 @@
-module Battle exposing (Battle, init, update, view)
+module Battle exposing (Battle, Msg, init, update, view)
 
 import Beast exposing (..)
 import Helming exposing (..)
@@ -12,10 +12,10 @@ type alias Battle =
     }
 
 
-init : Battle
-init =
+init : String -> Battle
+init beastType =
     { hero = Helming.init
-    , beast = Beast.init
+    , beast = Beast.init beastType
     }
 
 

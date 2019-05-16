@@ -10,9 +10,9 @@ type alias Beast =
     }
 
 
-init : Beast
-init =
-    { name = "Wyrm"
+init : String -> Beast
+init name =
+    { name = name
     , maxHealth = 200
     , health = 200
     }
