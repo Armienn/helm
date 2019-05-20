@@ -1,12 +1,12 @@
 module Main exposing (main)
 
 import Battle
+import Beast
 import Browser
 import Html exposing (..)
 import Html.Events exposing (onClick)
 import Http
 import Random
-import Json.Decode exposing (Decoder, field, string)
 
 
 main =
@@ -26,7 +26,7 @@ subscriptions model =
 type Model
     = Loading
     | Failure
-    | Success Battle.Battle
+    | Battle Battle.Model
 
 
 init : () -> ( Model, Cmd Msg )
@@ -35,25 +35,25 @@ init _ =
 
 
 type Msg
-    = GotPokemon (Result Http.Error String)
+    = NewPokemonId Int
+    | GotBeast (Result Http.Error Beast.Beast)
     | GotBattleMsg Battle.Msg
-    | NewPokemonId Int
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( msg, model ) of
-        ( GotPokemon (Ok result), _ ) ->
-            ( Success (Battle.init result), Cmd.none )
-
-        ( GotPokemon _, _ ) ->
-            ( Failure, Cmd.none )
-
-        ( GotBattleMsg battleMsg, Success battle ) ->
-            ( Success (Battle.update battleMsg battle), Cmd.none )
-
         ( NewPokemonId id, _ ) ->
             ( model, requestPokemon id )
+
+        ( GotBeast (Ok beast), _ ) ->
+            ( Battle (Battle.init beast), Cmd.none )
+
+        ( GotBeast _, _ ) ->
+            ( Failure, Cmd.none )
+
+        ( GotBattleMsg battleMsg, Battle battle ) ->
+            ( Battle (Battle.update battleMsg battle), Cmd.none )
 
         ( _, _ ) ->
             ( model, Cmd.none )
@@ -62,7 +62,7 @@ update msg model =
 view : Model -> Html Msg
 view model =
     case model of
-        Success battle ->
+        Battle battle ->
             Html.map GotBattleMsg (Battle.view battle)
 
         Loading ->
@@ -76,10 +76,5 @@ requestPokemon : Int -> Cmd Msg
 requestPokemon id =
     Http.get
         { url = "https://pokeapi.co/api/v2/pokemon/" ++ String.fromInt id
-        , expect = Http.expectJson GotPokemon pokemonDecoder
+        , expect = Http.expectJson GotBeast Beast.beastDecoder
         }
-
-
-pokemonDecoder : Decoder String
-pokemonDecoder =
-    field "species" (field "name" string)

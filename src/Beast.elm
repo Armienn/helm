@@ -1,7 +1,9 @@
-module Beast exposing (Beast, init, viewBeast)
+module Beast exposing (Beast, beastDecoder, viewBeast)
 
-import Html exposing (..)
 import CommonViews exposing (..)
+import Html exposing (..)
+import Json.Decode exposing (Decoder, at, field, int, string)
+
 
 type alias Beast =
     { name : String
@@ -9,13 +11,6 @@ type alias Beast =
     , health : Int
     }
 
-
-init : String -> Beast
-init name =
-    { name = name
-    , maxHealth = 200
-    , health = 200
-    }
 
 viewBeast : Beast -> Html msg
 viewBeast beast =
@@ -25,3 +20,10 @@ viewBeast beast =
         , viewHealth beast
         ]
 
+
+beastDecoder : Decoder Beast
+beastDecoder =
+    Json.Decode.map3 Beast
+        (at [ "species", "name" ] string)
+        (at [ "stats", "5", "base_stat" ] int)
+        (at [ "stats", "5", "base_stat" ] int)

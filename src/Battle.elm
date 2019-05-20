@@ -1,4 +1,4 @@
-module Battle exposing (Battle, Msg, init, update, view)
+module Battle exposing (Model, Msg, init, update, view)
 
 import Beast exposing (..)
 import Helming exposing (..)
@@ -6,16 +6,16 @@ import Html exposing (..)
 import Html.Events exposing (onClick)
 
 
-type alias Battle =
+type alias Model =
     { hero : Helming
     , beast : Beast
     }
 
 
-init : String -> Battle
-init beastType =
+init : Beast -> Model
+init beast =
     { hero = Helming.init
-    , beast = Beast.init beastType
+    , beast = beast
     }
 
 
@@ -24,7 +24,7 @@ type Msg
     | Heal Int
 
 
-update : Msg -> Battle -> Battle
+update : Msg -> Model -> Model
 update msg model =
     case msg of
         Heal amount ->
@@ -38,7 +38,7 @@ update msg model =
 -- VIEW
 
 
-view : Battle -> Html Msg
+view : Model -> Html Msg
 view battle =
     div []
         [ viewHelming battle.hero
@@ -48,7 +48,7 @@ view battle =
         ]
 
 
-viewActions : Battle -> Html Msg
+viewActions : Model -> Html Msg
 viewActions battle =
     div []
         [ button [ onClick (Attack 7) ] [ text "Attack" ]
