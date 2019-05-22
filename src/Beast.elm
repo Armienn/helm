@@ -38,7 +38,7 @@ transformName name =
     name
         |> listify
         |> groupConsecutive isSameLetterType
-        |> List.map mangleLetterGroup
+        |> List.map (mangleLetterGroup name)
         |> List.map String.fromList
         |> String.join " "
 
@@ -53,11 +53,19 @@ letters =
 
 
 vocals =
-    String.toList "aeyuio"
+    String.toList "eaiuyo"
 
 
 consonants =
-    String.toList "qwrtpsdfghjklzxcvbnm"
+    String.toList "tpkqdbgcfzmxwsrvljhn"
+
+
+firstVocal =
+    'a'
+
+
+firstConsonants =
+    't'
 
 
 isSameLetterType a b =
@@ -68,8 +76,48 @@ isVocal char =
     List.member char vocals
 
 
-mangleLetterGroup chars =
-    chars
+mangleLetterGroup nameSeed chars =
+    case chars of
+        first :: _ ->
+            if isVocal first then
+                mangleVocals nameSeed chars
+
+            else
+                mangleConsonants nameSeed chars
+
+        _ ->
+            chars
+
+
+mangleVocals nameSeed chars =
+    case List.head chars of
+        Just char ->
+            [ elementAfter char firstVocal vocals ]
+
+        _ ->
+            [ firstVocal ]
+
+
+mangleConsonants nameSeed chars =
+    case List.head chars of
+        Just char ->
+            [ elementAfter char firstConsonants consonants ]
+
+        _ ->
+            [ firstConsonants ]
+
+
+elementAfter element default list =
+    case list of
+        first :: second :: rest ->
+            if first == element then
+                second
+
+            else
+                elementAfter element default (second :: rest)
+
+        _ ->
+            default
 
 
 groupConsecutive : (a -> a -> Bool) -> List a -> List (List a)
