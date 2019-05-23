@@ -1,4 +1,4 @@
-module Battle exposing (Model, Msg, init, update, view)
+module Battle exposing (Model, Msg(..), init, update, view)
 
 import Beast exposing (..)
 import Helming exposing (..)
@@ -22,6 +22,7 @@ init beast =
 type Msg
     = Attack Int
     | Heal Int
+    | Run
 
 
 update : Msg -> Model -> Model
@@ -32,6 +33,9 @@ update msg model =
 
         Attack amount ->
             { model | beast = changeHealth model.beast -amount }
+
+        _ ->
+            model
 
 
 
@@ -53,4 +57,5 @@ viewActions battle =
     div []
         [ button [ onClick (Attack 7) ] [ text "Attack" ]
         , button [ onClick (Heal 5) ] [ text "Heal" ]
+        , button [ onClick Run ] [ text "Run" ]
         ]

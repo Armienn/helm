@@ -1,6 +1,6 @@
 module Main exposing (main)
 
-import Battle
+import Battle exposing (Msg(..))
 import Beast
 import Browser
 import Html exposing (..)
@@ -46,6 +46,9 @@ update msg model =
         ( NewPokemonId id, _ ) ->
             ( model, requestPokemon id )
 
+        ( GotBeast (Ok beast), Battle battle ) ->
+            ( Battle { battle | beast = beast }, Cmd.none )
+
         ( GotBeast (Ok beast), _ ) ->
             ( Battle (Battle.init beast), Cmd.none )
 
@@ -53,7 +56,11 @@ update msg model =
             ( Failure, Cmd.none )
 
         ( GotBattleMsg battleMsg, Battle battle ) ->
-            ( Battle (Battle.update battleMsg battle), Cmd.none )
+            case battleMsg of
+                Run ->
+                    ( Battle battle, Random.generate NewPokemonId (Random.int 1 720) )
+                _ ->
+                    ( Battle (Battle.update battleMsg battle), Cmd.none )
 
         ( _, _ ) ->
             ( model, Cmd.none )

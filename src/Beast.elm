@@ -48,11 +48,13 @@ listify : String -> List Char
 listify name =
     List.filter (\c -> List.member c letters) (String.toList name)
 
-capitalise: String -> String
+
+capitalise : String -> String
 capitalise text =
     case String.uncons text of
-        Just (first, rest) ->
+        Just ( first, rest ) ->
             String.cons (Char.toUpper first) rest
+
         _ ->
             text
 
@@ -73,7 +75,7 @@ firstVocal =
     'a'
 
 
-firstConsonants =
+firstConsonant =
     't'
 
 
@@ -110,10 +112,10 @@ mangleVocals nameSeed chars =
 mangleConsonants nameSeed chars =
     case List.head chars of
         Just char ->
-            [ elementAfter char firstConsonants consonants ]
+            [ elementAfter char firstConsonant consonants ]
 
         _ ->
-            [ firstConsonants ]
+            [ firstConsonant ]
 
 
 elementAfter element default list =
