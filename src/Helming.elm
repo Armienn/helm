@@ -1,4 +1,4 @@
-module Helming exposing (Helming, changeHealth, init, viewHelming)
+module Helming exposing (Helming, changeHealth, exhaustHelming, init, recoverHelming, viewHelming)
 
 import CommonViews exposing (..)
 import Html exposing (..)
@@ -10,6 +10,7 @@ type alias Helming =
     , xp : Int
     , maxHealth : Int
     , health : Int
+    , exhausted : Bool
     }
 
 
@@ -19,12 +20,23 @@ init =
     , xp = 50
     , maxHealth = 40
     , health = 30
+    , exhausted = False
     }
 
 
 changeHealth : { a | health : Int, maxHealth : Int } -> Int -> { a | health : Int, maxHealth : Int }
 changeHealth thing change =
     { thing | health = max (min (thing.health + change) thing.maxHealth) 0 }
+
+
+exhaustHelming : Helming -> Helming
+exhaustHelming helming =
+    { helming | exhausted = True }
+
+
+recoverHelming : Helming -> Helming
+recoverHelming helming =
+    { helming | exhausted = False }
 
 
 

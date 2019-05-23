@@ -20,19 +20,30 @@ init beast =
 
 
 type Msg
-    = Attack Int
+    = MassiveAttack Int
+    | Attack Int
     | Heal Int
+    | Recover
     | Run
 
 
 update : Msg -> Model -> Model
 update msg model =
     case msg of
-        Heal amount ->
-            { model | hero = changeHealth model.hero amount }
+        MassiveAttack amount ->
+            { model
+                | beast = changeHealth model.beast -amount
+                , hero = exhaustHelming model.hero
+            }
 
         Attack amount ->
             { model | beast = changeHealth model.beast -amount }
+
+        Heal amount ->
+            { model | hero = changeHealth model.hero amount }
+
+        Recover ->
+            { model | hero = recoverHelming model.hero }
 
         _ ->
             model
@@ -45,17 +56,25 @@ update msg model =
 view : Model -> Html Msg
 view battle =
     div []
-        [ viewHelming battle.hero
+        [ viewBeast battle.beast
         , div [] [ text "vs" ]
-        , viewBeast battle.beast
+        , viewHelming battle.hero
         , viewActions battle
         ]
 
 
 viewActions : Model -> Html Msg
 viewActions battle =
-    div []
-        [ button [ onClick (Attack 7) ] [ text "Attack" ]
-        , button [ onClick (Heal 5) ] [ text "Heal" ]
-        , button [ onClick Run ] [ text "Run" ]
-        ]
+    if battle.hero.exhausted then
+        div []
+            [ text "You're too exhausted to fight"
+            , button [ onClick Recover ] [ text "Recover" ]
+            ]
+
+    else
+        div []
+            [ button [ onClick (MassiveAttack 12) ] [ text "Massive Attack" ]
+            , button [ onClick (Attack 7) ] [ text "Attack" ]
+            , button [ onClick (Heal 5) ] [ text "Heal" ]
+            , button [ onClick Run ] [ text "Run" ]
+            ]

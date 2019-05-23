@@ -31,7 +31,7 @@ type Model
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Loading, Random.generate NewPokemonId (Random.int 1 720) )
+    ( Loading, Random.generate NewPokemonId (Random.int 1 numberOfPokemon) )
 
 
 type Msg
@@ -58,7 +58,8 @@ update msg model =
         ( GotBattleMsg battleMsg, Battle battle ) ->
             case battleMsg of
                 Run ->
-                    ( Battle battle, Random.generate NewPokemonId (Random.int 1 720) )
+                    ( Battle battle, Random.generate NewPokemonId (Random.int 1 numberOfPokemon) )
+
                 _ ->
                     ( Battle (Battle.update battleMsg battle), Cmd.none )
 
@@ -85,3 +86,7 @@ requestPokemon id =
         { url = "https://pokeapi.co/api/v2/pokemon/" ++ String.fromInt id
         , expect = Http.expectJson GotBeast Beast.beastDecoder
         }
+
+
+numberOfPokemon =
+    800
