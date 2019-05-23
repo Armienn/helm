@@ -40,12 +40,21 @@ transformName name =
         |> groupConsecutive isSameLetterType
         |> List.map (mangleLetterGroup name)
         |> List.map String.fromList
-        |> String.join " "
+        |> String.join ""
+        |> capitalise
 
 
 listify : String -> List Char
 listify name =
     List.filter (\c -> List.member c letters) (String.toList name)
+
+capitalise: String -> String
+capitalise text =
+    case String.uncons text of
+        Just (first, rest) ->
+            String.cons (Char.toUpper first) rest
+        _ ->
+            text
 
 
 letters =
