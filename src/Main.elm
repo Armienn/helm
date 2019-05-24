@@ -3,6 +3,8 @@ module Main exposing (main)
 import Battle exposing (Msg(..))
 import Beast
 import Browser
+import ChooseOpponent exposing (Msg(..))
+import Helming
 import Html exposing (..)
 import Html.Events exposing (onClick)
 import Http
@@ -26,39 +28,47 @@ subscriptions model =
 type Model
     = Loading
     | Failure
+    | ChooseOpponent ChooseOpponent.Model
     | Battle Battle.Model
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Loading, Random.generate NewPokemonId (Random.int 1 numberOfPokemon) )
+    ( Loading, Random.generate NewPokemonIds (randomPokemonIds 3) )
 
 
 type Msg
-    = NewPokemonId Int
-    | GotBeast (Result Http.Error Beast.Beast)
+    = NewPokemonIds (List Int)
+    | GotBeast (List Int) (List Beast.Beast) (Result Http.Error Beast.Beast)
+    | GotChoiceMsg ChooseOpponent.Msg
     | GotBattleMsg Battle.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( msg, model ) of
-        ( NewPokemonId id, _ ) ->
-            ( model, requestPokemon id )
+        ( NewPokemonIds ids, _ ) ->
+            ( model, requestPokemon ids [] )
 
-        ( GotBeast (Ok beast), Battle battle ) ->
-            ( Battle { battle | beast = beast }, Cmd.none )
+        ( GotBeast [] beasts (Ok beast), Battle battle ) ->
+            ( ChooseOpponent { beasts = beast :: beasts, hero = battle.hero }, Cmd.none )
 
-        ( GotBeast (Ok beast), _ ) ->
-            ( Battle (Battle.init beast), Cmd.none )
+        ( GotBeast [] beasts (Ok beast), _ ) ->
+            ( ChooseOpponent { beasts = beast :: beasts, hero = Helming.init }, Cmd.none )
 
-        ( GotBeast _, _ ) ->
+        ( GotBeast ids beasts (Ok beast), m ) ->
+            ( m, requestPokemon ids (beast :: beasts) )
+
+        ( GotBeast _ _ _, _ ) ->
             ( Failure, Cmd.none )
+
+        ( GotChoiceMsg (Choose beast), ChooseOpponent choiceModel ) ->
+            ( Battle { beast = beast, hero = choiceModel.hero }, Cmd.none )
 
         ( GotBattleMsg battleMsg, Battle battle ) ->
             case battleMsg of
                 Run ->
-                    ( Battle battle, Random.generate NewPokemonId (Random.int 1 numberOfPokemon) )
+                    ( Battle battle, Random.generate NewPokemonIds (randomPokemonIds 3) )
 
                 _ ->
                     ( Battle (Battle.update battleMsg battle), Cmd.none )
@@ -70,6 +80,9 @@ update msg model =
 view : Model -> Html Msg
 view model =
     case model of
+        ChooseOpponent opponents ->
+            Html.map GotChoiceMsg (ChooseOpponent.view opponents)
+
         Battle battle ->
             Html.map GotBattleMsg (Battle.view battle)
 
@@ -77,16 +90,26 @@ view model =
             div [] [ text "Loading" ]
 
         Failure ->
-            div [] [ text "Failed to load beast" ]
+            div [] [ text "Failed to load beasts" ]
 
 
-requestPokemon : Int -> Cmd Msg
-requestPokemon id =
-    Http.get
-        { url = "https://pokeapi.co/api/v2/pokemon/" ++ String.fromInt id
-        , expect = Http.expectJson GotBeast Beast.beastDecoder
-        }
+requestPokemon : List Int -> List Beast.Beast -> Cmd Msg
+requestPokemon ids loadedBeasts =
+    case ids of
+        first :: rest ->
+            Http.get
+                { url = "https://pokeapi.co/api/v2/pokemon/" ++ String.fromInt first
+                , expect = Http.expectJson (GotBeast rest loadedBeasts) Beast.beastDecoder
+                }
+
+        _ ->
+            Cmd.none
 
 
 numberOfPokemon =
     800
+
+
+randomPokemonIds : Int -> Random.Generator (List Int)
+randomPokemonIds count =
+    Random.list count (Random.int 1 numberOfPokemon)
