@@ -1,4 +1,4 @@
-module Battle exposing (Model, Msg(..), init, update, view)
+module Battle exposing (Model(..), Msg(..), init, update, view)
 
 import Beast exposing (..)
 import Helming exposing (..)
@@ -6,17 +6,14 @@ import Html exposing (..)
 import Html.Events exposing (onClick)
 
 
-type alias Model =
-    { hero : Helming
-    , beast : Beast
-    }
+type Model
+    = Fight Helming Beast
+    | Finished Helming
 
 
 init : Beast -> Model
 init beast =
-    { hero = Helming.init
-    , beast = beast
-    }
+    Fight Helming.init beast
 
 
 type Msg
@@ -29,24 +26,41 @@ type Msg
 
 update : Msg -> Model -> Model
 update msg model =
-    case msg of
-        MassiveAttack amount ->
-            { model
-                | beast = changeHealth model.beast -amount
-                , hero = exhaustHelming model.hero
-            }
-
-        Attack amount ->
-            { model | beast = changeHealth model.beast -amount }
-
-        Heal amount ->
-            { model | hero = changeHealth model.hero amount }
-
-        Recover ->
-            { model | hero = recoverHelming model.hero }
+    case model of
+        Fight helming beast ->
+            updateFight msg helming beast
 
         _ ->
             model
+
+
+updateFight : Msg -> Helming -> Beast -> Model
+updateFight msg helming beast =
+    case msg of
+        MassiveAttack amount ->
+            Fight
+                (exhaustHelming helming)
+                (changeHealth beast -amount)
+
+        Attack amount ->
+            let
+                newHealth =
+                    updatedHealth beast -amount
+            in
+            if newHealth <= 0 then
+                Finished helming
+
+            else
+                Fight helming { beast | health = newHealth }
+
+        Heal amount ->
+            Fight (changeHealth helming amount) beast
+
+        Recover ->
+            Fight (recoverHelming helming) beast
+
+        Run ->
+            Finished helming
 
 
 
@@ -55,17 +69,27 @@ update msg model =
 
 view : Model -> Html Msg
 view battle =
+    case battle of
+        Fight helming beast ->
+            viewBattle helming beast
+        
+        _ ->
+            div [] [ text "huh" ]
+
+
+viewBattle : Helming -> Beast -> Html Msg
+viewBattle helming beast =
     div []
-        [ viewBeast battle.beast
+        [ viewBeast beast
         , div [] [ text "vs" ]
-        , viewHelming battle.hero
-        , viewActions battle
+        , viewHelming helming
+        , viewActions helming
         ]
 
 
-viewActions : Model -> Html Msg
-viewActions battle =
-    if battle.hero.exhausted then
+viewActions : Helming -> Html Msg
+viewActions helming =
+    if helming.exhausted then
         div []
             [ text "You're too exhausted to fight"
             , button [ onClick Recover ] [ text "Recover" ]

@@ -1,4 +1,4 @@
-module Helming exposing (Helming, changeHealth, exhaustHelming, init, recoverHelming, viewHelming)
+module Helming exposing (Helming, changeHealth, updatedHealth, exhaustHelming, init, recoverHelming, viewHelming)
 
 import CommonViews exposing (..)
 import Html exposing (..)
@@ -27,6 +27,11 @@ init =
 changeHealth : { a | health : Int, maxHealth : Int } -> Int -> { a | health : Int, maxHealth : Int }
 changeHealth thing change =
     { thing | health = max (min (thing.health + change) thing.maxHealth) 0 }
+
+
+updatedHealth : { a | health : Int, maxHealth : Int } -> Int -> Int
+updatedHealth thing change =
+    max (min (thing.health + change) thing.maxHealth) 0
 
 
 exhaustHelming : Helming -> Helming

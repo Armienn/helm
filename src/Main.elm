@@ -1,6 +1,6 @@
 module Main exposing (main)
 
-import Battle exposing (Msg(..))
+import Battle exposing (Model(..), Msg(..))
 import Beast
 import Browser
 import ChooseOpponent exposing (Msg(..))
@@ -26,7 +26,7 @@ subscriptions model =
 
 
 type Model
-    = Loading
+    = Loading Helming.Helming
     | Failure
     | ChooseOpponent ChooseOpponent.Model
     | Battle Battle.Model
@@ -34,7 +34,7 @@ type Model
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Loading, Random.generate NewPokemonIds (randomPokemonIds 3) )
+    ( Loading Helming.init, Random.generate NewPokemonIds (randomPokemonIds 3) )
 
 
 type Msg
@@ -46,35 +46,66 @@ type Msg
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case ( msg, model ) of
-        ( NewPokemonIds ids, _ ) ->
-            ( model, requestPokemon ids [] )
+    case model of
+        Loading m ->
+            updateLoading msg m
 
-        ( GotBeast [] beasts (Ok beast), Battle battle ) ->
-            ( ChooseOpponent { beasts = beast :: beasts, hero = battle.hero }, Cmd.none )
+        ChooseOpponent m ->
+            updateChooseOpponent msg m
 
-        ( GotBeast [] beasts (Ok beast), _ ) ->
-            ( ChooseOpponent { beasts = beast :: beasts, hero = Helming.init }, Cmd.none )
+        Battle m ->
+            updateBattle msg m
 
-        ( GotBeast ids beasts (Ok beast), m ) ->
-            ( m, requestPokemon ids (beast :: beasts) )
+        _ ->
+            ( model, Cmd.none )
 
-        ( GotBeast _ _ _, _ ) ->
+
+updateLoading : Msg -> Helming.Helming -> ( Model, Cmd Msg )
+updateLoading msg helming =
+    case msg of
+        NewPokemonIds ids ->
+            ( Loading helming, requestPokemon ids [] )
+
+        GotBeast [] beasts (Ok beast) ->
+            ( ChooseOpponent { beasts = beast :: beasts, hero = helming }, Cmd.none )
+
+        GotBeast ids beasts (Ok beast) ->
+            ( Loading helming, requestPokemon ids (beast :: beasts) )
+
+        GotBeast _ _ _ ->
             ( Failure, Cmd.none )
 
-        ( GotChoiceMsg (Choose beast), ChooseOpponent choiceModel ) ->
-            ( Battle { beast = beast, hero = choiceModel.hero }, Cmd.none )
+        _ ->
+            ( Loading helming, Cmd.none )
 
-        ( GotBattleMsg battleMsg, Battle battle ) ->
-            case battleMsg of
-                Run ->
-                    ( Battle battle, Random.generate NewPokemonIds (randomPokemonIds 3) )
 
-                _ ->
-                    ( Battle (Battle.update battleMsg battle), Cmd.none )
+updateBattle : Msg -> Battle.Model -> ( Model, Cmd Msg )
+updateBattle msg battle =
+    case msg of
+        GotBattleMsg battleMsg ->
+            let
+                newState =
+                    Battle.update battleMsg battle
+            in
+            case newState of
+                Fight helming beast ->
+                    ( Battle newState, Cmd.none )
 
-        ( _, _ ) ->
-            ( model, Cmd.none )
+                Finished helming ->
+                    ( Loading helming, Random.generate NewPokemonIds (randomPokemonIds 3) )
+
+        _ ->
+            ( Battle battle, Cmd.none )
+
+
+updateChooseOpponent : Msg -> ChooseOpponent.Model -> ( Model, Cmd Msg )
+updateChooseOpponent msg model =
+    case msg of
+        GotChoiceMsg (Choose beast) ->
+            ( Battle (Battle.Fight model.hero beast), Cmd.none )
+
+        _ ->
+            ( ChooseOpponent model, Cmd.none )
 
 
 view : Model -> Html Msg
@@ -86,7 +117,7 @@ view model =
         Battle battle ->
             Html.map GotBattleMsg (Battle.view battle)
 
-        Loading ->
+        Loading _ ->
             div [] [ text "Loading" ]
 
         Failure ->
