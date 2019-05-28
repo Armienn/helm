@@ -8,6 +8,9 @@ import Html.Events exposing (onClick)
 
 type Model
     = Fight Helming Beast
+    | BeastAttack Helming Beast
+    | BeastFlinch Helming Beast
+    | Lost Helming
     | Finished Helming
 
 
@@ -22,6 +25,7 @@ type Msg
     | Heal Int
     | Recover
     | Run
+    | Nothing
 
 
 update : Msg -> Model -> Model
@@ -31,16 +35,22 @@ update msg model =
             updateFight msg helming beast
 
         _ ->
-            model
+            updateBeastAction model
 
 
 updateFight : Msg -> Helming -> Beast -> Model
 updateFight msg helming beast =
     case msg of
         MassiveAttack amount ->
-            Fight
-                (exhaustHelming helming)
-                (changeHealth beast -amount)
+            let
+                newHealth =
+                    updatedHealth beast -amount
+            in
+            if newHealth <= 0 then
+                Finished helming
+
+            else
+                BeastFlinch (exhaustHelming helming) { beast | health = newHealth }
 
         Attack amount ->
             let
@@ -51,16 +61,40 @@ updateFight msg helming beast =
                 Finished helming
 
             else
-                Fight helming { beast | health = newHealth }
+                BeastAttack helming { beast | health = newHealth }
 
         Heal amount ->
-            Fight (changeHealth helming amount) beast
+            BeastAttack (changeHealth helming amount) beast
 
         Recover ->
-            Fight (recoverHelming helming) beast
+            BeastAttack (recoverHelming helming) beast
 
         Run ->
             Finished helming
+
+        _ ->
+            Fight helming beast
+
+
+updateBeastAction : Model -> Model
+updateBeastAction model =
+    case model of
+        BeastAttack helming beast ->
+            let
+                newHealth =
+                    updatedHealth helming -5
+            in
+            if newHealth <= 0 then
+                Lost { helming | health = newHealth }
+
+            else
+                Fight { helming | health = newHealth } beast
+
+        BeastFlinch helming beast ->
+            Fight helming beast
+
+        _ ->
+            model
 
 
 
@@ -72,7 +106,16 @@ view battle =
     case battle of
         Fight helming beast ->
             viewBattle helming beast
-        
+
+        BeastAttack helming beast ->
+            viewBeastAttack helming beast
+
+        BeastFlinch helming beast ->
+            viewBeastFlinch helming beast
+
+        Lost _ ->
+            div [] [ text "You died..." ]
+
         _ ->
             div [] [ text "huh" ]
 
@@ -91,7 +134,7 @@ viewActions : Helming -> Html Msg
 viewActions helming =
     if helming.exhausted then
         div []
-            [ text "You're too exhausted to fight"
+            [ text "You're too exhausted to fight "
             , button [ onClick Recover ] [ text "Recover" ]
             ]
 
@@ -102,3 +145,13 @@ viewActions helming =
             , button [ onClick (Heal 5) ] [ text "Heal" ]
             , button [ onClick Run ] [ text "Run" ]
             ]
+
+
+viewBeastAttack : Helming -> Beast -> Html Msg
+viewBeastAttack helming beast =
+    div [] [ button [ onClick Nothing ] [ text "The beast attacks!" ] ]
+
+
+viewBeastFlinch : Helming -> Beast -> Html Msg
+viewBeastFlinch helming beast =
+    div [] [ button [ onClick Nothing ] [ text "The beast flinches!" ] ]

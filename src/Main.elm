@@ -88,11 +88,11 @@ updateBattle msg battle =
                     Battle.update battleMsg battle
             in
             case newState of
-                Fight helming beast ->
-                    ( Battle newState, Cmd.none )
-
                 Finished helming ->
                     ( Loading helming, Random.generate NewPokemonIds (randomPokemonIds 3) )
+
+                _ ->
+                    ( Battle newState, Cmd.none )
 
         _ ->
             ( Battle battle, Cmd.none )
