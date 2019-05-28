@@ -7,7 +7,6 @@ import Html.Events exposing (onClick)
 
 type alias Helming =
     { name : String
-    , xp : Int
     , maxHealth : Int
     , health : Int
     , strength : Int
@@ -19,9 +18,8 @@ type alias Helming =
 init : Helming
 init =
     { name = "Aslak"
-    , xp = 50
-    , maxHealth = 40
-    , health = 30
+    , maxHealth = 50
+    , health = 50
     , strength = 50
     , defense = 50
     , exhausted = False
@@ -58,6 +56,4 @@ viewHelming helming =
         [ viewName "Helming" helming.name
         , separator
         , viewHealth helming
-        , separator
-        , viewXp helming.xp
         ]

@@ -1,17 +1,18 @@
 module Battle exposing (Model(..), Msg(..), init, update, view)
 
 import Beast exposing (..)
-import Helming exposing (..)
 import Fighting
+import Helming exposing (..)
 import Html exposing (..)
 import Html.Events exposing (onClick)
 
 
 type Model
     = Fight Helming Beast
-    | BeastAttack Helming Beast
-    | BeastFlinch Helming Beast
+    | BeastAttack Helming Beast String
+    | BeastFlinch Helming Beast String
     | Lost Helming
+    | Won Helming
     | Finished Helming
 
 
@@ -44,31 +45,52 @@ updateFight msg helming beast =
     case msg of
         MassiveAttack amount ->
             let
-                newHealth =
-                    Fighting.healthAfterAttack -amount helming beast
+                damage =
+                    Fighting.attackDamage -amount helming beast
             in
-            if newHealth <= 0 then
-                Finished helming
+            if beast.health - damage <= 0 then
+                Won helming
 
             else
-                BeastFlinch (exhaustHelming helming) { beast | health = newHealth }
+                BeastFlinch
+                    (exhaustHelming helming)
+                    { beast | health = beast.health - damage }
+                    ("You attack the beast, dealing "
+                        ++ String.fromInt damage
+                        ++ " damage "
+                    )
 
         Attack amount ->
             let
-                newHealth =
-                    Fighting.healthAfterAttack -amount helming beast
+                damage =
+                    Fighting.attackDamage -amount helming beast
             in
-            if newHealth <= 0 then
-                Finished helming
+            if beast.health - damage <= 0 then
+                Won helming
 
             else
-                BeastAttack helming { beast | health = newHealth }
+                BeastAttack
+                    helming
+                    { beast | health = beast.health - damage }
+                    ("You attack the beast, dealing "
+                        ++ String.fromInt damage
+                        ++ " damage "
+                    )
 
         Heal amount ->
-            BeastAttack (changeHealth helming amount) beast
+            BeastAttack
+                (changeHealth helming amount)
+                beast
+                ("You heal yourself for "
+                    ++ String.fromInt amount
+                    ++ " hp "
+                )
 
         Recover ->
-            BeastAttack (recoverHelming helming) beast
+            BeastAttack
+                (recoverHelming helming)
+                beast
+                "You're no longer exhausted "
 
         Run ->
             Finished helming
@@ -80,19 +102,31 @@ updateFight msg helming beast =
 updateBeastAction : Model -> Model
 updateBeastAction model =
     case model of
-        BeastAttack helming beast ->
+        BeastAttack helming beast _ ->
             let
-                newHealth =
-                    Fighting.healthAfterAttack -5 beast helming
+                damage =
+                    Fighting.attackDamage -5 beast helming
             in
-            if newHealth <= 0 then
-                Lost { helming | health = newHealth }
+            if helming.health - damage <= 0 then
+                Lost { helming | health = helming.health - damage }
 
             else
-                Fight { helming | health = newHealth } beast
+                Fight { helming | health = helming.health - damage } beast
 
-        BeastFlinch helming beast ->
+        BeastFlinch helming beast _ ->
             Fight helming beast
+
+        Won helming ->
+            Finished
+                { helming
+                    | strength = helming.strength + 10
+                    , defense = helming.defense + 10
+                    , maxHealth = helming.maxHealth + 10
+                    , health = helming.maxHealth + 10
+                }
+
+        Lost helming ->
+            Finished Helming.init
 
         _ ->
             model
@@ -106,28 +140,37 @@ view : Model -> Html Msg
 view battle =
     case battle of
         Fight helming beast ->
-            viewBattle helming beast
+            viewBattle helming beast (viewActions helming)
 
-        BeastAttack helming beast ->
-            viewBeastAttack helming beast
+        BeastAttack helming beast message ->
+            viewBattle helming beast (viewBeastAttack helming beast message)
 
-        BeastFlinch helming beast ->
-            viewBeastFlinch helming beast
+        BeastFlinch helming beast message ->
+            viewBattle helming beast (viewBeastFlinch helming beast message)
 
         Lost _ ->
-            div [] [ text "You died..." ]
+            div []
+                [ text "You died... "
+                , button [ onClick Nothing ] [ text "Reincarnate" ]
+                ]
+
+        Won _ ->
+            div []
+                [ text "You defeated the beast. You gain 10 power "
+                , button [ onClick Nothing ] [ text "Continue journey" ]
+                ]
 
         _ ->
             div [] [ text "huh" ]
 
 
-viewBattle : Helming -> Beast -> Html Msg
-viewBattle helming beast =
+viewBattle : Helming -> Beast -> Html Msg -> Html Msg
+viewBattle helming beast actions =
     div []
         [ viewBeast beast
         , div [] [ text "vs" ]
         , viewHelming helming
-        , viewActions helming
+        , actions
         ]
 
 
@@ -148,11 +191,17 @@ viewActions helming =
             ]
 
 
-viewBeastAttack : Helming -> Beast -> Html Msg
-viewBeastAttack helming beast =
-    div [] [ button [ onClick Nothing ] [ text "The beast attacks!" ] ]
+viewBeastAttack : Helming -> Beast -> String -> Html Msg
+viewBeastAttack helming beast message =
+    div []
+        [ text message
+        , button [ onClick Nothing ] [ text "The beast attacks!" ]
+        ]
 
 
-viewBeastFlinch : Helming -> Beast -> Html Msg
-viewBeastFlinch helming beast =
-    div [] [ button [ onClick Nothing ] [ text "The beast flinches!" ] ]
+viewBeastFlinch : Helming -> Beast -> String -> Html Msg
+viewBeastFlinch helming beast message =
+    div []
+        [ text message
+        , button [ onClick Nothing ] [ text "The beast flinches!" ]
+        ]

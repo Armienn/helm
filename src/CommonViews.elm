@@ -1,4 +1,4 @@
-module CommonViews exposing (separator, viewHealth, viewName, viewXp)
+module CommonViews exposing (separator, viewHealth, viewName)
 
 import Html exposing (..)
 
@@ -23,7 +23,3 @@ viewHealth helming =
             )
         ]
 
-
-viewXp : Int -> Html msg
-viewXp xp =
-    span [] [ text ("XP: " ++ String.fromInt xp) ]

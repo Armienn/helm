@@ -1,4 +1,4 @@
-module Fighting exposing (healthAfterAttack)
+module Fighting exposing (attackDamage)
 
 
 type alias Fighter a =
@@ -9,6 +9,9 @@ type alias Fighter a =
         , defense : Int
     }
 
+attackDamage : Int -> Fighter a -> Fighter b -> Int
+attackDamage power attacker defender =
+    defender.health - healthAfterAttack power attacker defender
 
 healthAfterAttack : Int -> Fighter a -> Fighter b -> Int
 healthAfterAttack power attacker defender =
