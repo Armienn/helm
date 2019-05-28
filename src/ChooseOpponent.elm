@@ -31,5 +31,5 @@ viewChoice : Beast -> Html Msg
 viewChoice beast =
     div []
         [ button [ onClick <| Choose beast ] [ text <| "Fight " ++ beast.name ]
-        , text <| " Terrifyingness: " ++ String.fromInt beast.maxHealth
+        , text <| " Terrifyingness: " ++ String.fromInt (beast.maxHealth + beast.strength + beast.defense)
         ]

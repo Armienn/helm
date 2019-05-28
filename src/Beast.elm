@@ -9,6 +9,8 @@ type alias Beast =
     { name : String
     , maxHealth : Int
     , health : Int
+    , strength : Int
+    , defense : Int
     }
 
 
@@ -23,10 +25,12 @@ viewBeast beast =
 
 beastDecoder : Decoder Beast
 beastDecoder =
-    Json.Decode.map3 Beast
+    Json.Decode.map5 Beast
         (at [ "species", "name" ] nameString)
         (at [ "stats", "5", "base_stat" ] int)
         (at [ "stats", "5", "base_stat" ] int)
+        (at [ "stats", "4", "base_stat" ] int)
+        (at [ "stats", "3", "base_stat" ] int)
 
 
 nameString =

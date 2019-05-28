@@ -2,6 +2,7 @@ module Battle exposing (Model(..), Msg(..), init, update, view)
 
 import Beast exposing (..)
 import Helming exposing (..)
+import Fighting
 import Html exposing (..)
 import Html.Events exposing (onClick)
 
@@ -44,7 +45,7 @@ updateFight msg helming beast =
         MassiveAttack amount ->
             let
                 newHealth =
-                    updatedHealth beast -amount
+                    Fighting.healthAfterAttack -amount helming beast
             in
             if newHealth <= 0 then
                 Finished helming
@@ -55,7 +56,7 @@ updateFight msg helming beast =
         Attack amount ->
             let
                 newHealth =
-                    updatedHealth beast -amount
+                    Fighting.healthAfterAttack -amount helming beast
             in
             if newHealth <= 0 then
                 Finished helming
@@ -82,7 +83,7 @@ updateBeastAction model =
         BeastAttack helming beast ->
             let
                 newHealth =
-                    updatedHealth helming -5
+                    Fighting.healthAfterAttack -5 beast helming
             in
             if newHealth <= 0 then
                 Lost { helming | health = newHealth }

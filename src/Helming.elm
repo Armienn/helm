@@ -10,6 +10,8 @@ type alias Helming =
     , xp : Int
     , maxHealth : Int
     , health : Int
+    , strength : Int
+    , defense : Int
     , exhausted : Bool
     }
 
@@ -20,6 +22,8 @@ init =
     , xp = 50
     , maxHealth = 40
     , health = 30
+    , strength = 50
+    , defense = 50
     , exhausted = False
     }
 
